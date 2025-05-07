@@ -1,5 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { toast } from 'sonner';
 
 export interface User {
   id: string;
@@ -10,7 +11,40 @@ export interface User {
   location?: string;
   profession?: string;
   skills?: string[];
+  education?: Education[];
+  experience?: Experience[];
+  socialLinks?: SocialLinks;
   createdAt: string;
+  phone?: string;
+}
+
+export interface Education {
+  id: string;
+  institution: string;
+  degree: string;
+  field: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  description?: string;
+}
+
+export interface Experience {
+  id: string;
+  company: string;
+  position: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  description?: string;
+}
+
+export interface SocialLinks {
+  linkedin?: string;
+  github?: string;
+  twitter?: string;
+  website?: string;
 }
 
 interface AuthContextType {
@@ -21,6 +55,7 @@ interface AuthContextType {
   register: (email: string, password: string, fullName: string) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,10 +101,55 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       bio: 'Software developer with 5 years of experience',
       location: 'San Francisco, CA',
       profession: 'Frontend Developer',
-      skills: ['React', 'TypeScript', 'CSS'],
+      skills: ['React', 'TypeScript', 'CSS', 'Node.js', 'MongoDB'],
+      education: [
+        {
+          id: '1',
+          institution: 'Stanford University',
+          degree: 'Bachelor\'s',
+          field: 'Computer Science',
+          startDate: '2015-09-01',
+          endDate: '2019-06-15',
+          current: false,
+          description: 'Graduated with honors'
+        }
+      ],
+      experience: [
+        {
+          id: '1',
+          company: 'Tech Solutions Inc.',
+          position: 'Frontend Developer',
+          location: 'San Francisco, CA',
+          startDate: '2019-07-01',
+          endDate: undefined,
+          current: true,
+          description: 'Building responsive web applications using React and TypeScript'
+        },
+        {
+          id: '2',
+          company: 'StartUp Co.',
+          position: 'Intern',
+          location: 'Palo Alto, CA',
+          startDate: '2018-06-01',
+          endDate: '2018-08-31',
+          current: false,
+          description: 'Assisted in developing user interfaces for client projects'
+        }
+      ],
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/johndoe',
+        github: 'https://github.com/johndoe',
+        twitter: 'https://twitter.com/johndoe',
+        website: 'https://johndoe.com'
+      },
+      phone: '+1 (555) 123-4567',
       createdAt: new Date().toISOString()
     }
   ];
+
+  const clearError = () => {
+    setError(null);
+  };
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -88,11 +168,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       setCurrentUser(user);
       localStorage.setItem('user', JSON.stringify(user));
+      toast.success('Successfully logged in');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
+        toast.error(error.message);
       } else {
         setError('An unexpected error occurred');
+        toast.error('An unexpected error occurred');
       }
     } finally {
       setLoading(false);
@@ -115,16 +198,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: String(dummyUsers.length + 1),
         email,
         fullName,
+        skills: [],
         createdAt: new Date().toISOString()
       };
       
       setCurrentUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
+      toast.success('Account created successfully');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
+        toast.error(error.message);
       } else {
         setError('An unexpected error occurred');
+        toast.error('An unexpected error occurred');
       }
     } finally {
       setLoading(false);
@@ -134,6 +221,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('user');
+    toast.success('Logged out successfully');
   };
 
   const updateProfile = async (userData: Partial<User>) => {
@@ -148,11 +236,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...currentUser, ...userData };
       setCurrentUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast.success('Profile updated successfully');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
+        toast.error(error.message);
       } else {
         setError('An unexpected error occurred');
+        toast.error('An unexpected error occurred');
       }
     } finally {
       setLoading(false);
@@ -166,7 +257,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    updateProfile
+    updateProfile,
+    clearError
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

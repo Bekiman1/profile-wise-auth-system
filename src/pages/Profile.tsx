@@ -1,10 +1,12 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileCard from '@/components/ProfileCard';
 import ProfileForm from '@/components/ProfileForm';
+import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 
 const Profile = () => {
   const { currentUser } = useAuth();
@@ -22,7 +24,14 @@ const Profile = () => {
   
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Your Profile</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Your Profile</h1>
+        <Button variant="outline" asChild>
+          <Link to="/resume">
+            <FileText className="h-4 w-4 mr-2" /> View Resume
+          </Link>
+        </Button>
+      </div>
       
       <Tabs defaultValue="view" className="w-full">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
